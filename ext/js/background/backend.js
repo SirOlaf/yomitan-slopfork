@@ -2836,6 +2836,12 @@ export class Backend {
      * @returns {Promise<chrome.tabs.Tab>}
      */
     _createTab(url) {
+        // Electron doesn't support chrome.tabs API
+        if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.create) {
+            console.log('[Yomitan] Would open tab:', url);
+            console.log('[Yomitan] Use Cmd+Shift+Y to open Yomitan settings');
+            return Promise.resolve(/** @type {chrome.tabs.Tab} */ ({id: -1, url}));
+        }
         return new Promise((resolve, reject) => {
             chrome.tabs.create({url}, (tab) => {
                 const e = chrome.runtime.lastError;

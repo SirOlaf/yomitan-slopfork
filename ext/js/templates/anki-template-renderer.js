@@ -814,8 +814,8 @@ export class AnkiTemplateRenderer {
     _convertGlossaryStructuredContentRecursive(content, structuredContentGenerator) {
         /** @type {string[]} */
         const rawGlossaryContent = [];
-        for (let i = 0; i < content.length; i++) {
-            const structuredGloss = content[i];
+        while (content.length > 0) {
+            const structuredGloss = content.shift();
             if (typeof structuredGloss === 'string') {
                 rawGlossaryContent.push(structuredGloss);
             } else if (Array.isArray(structuredGloss)) {

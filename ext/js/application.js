@@ -56,14 +56,28 @@ if (checkChromeNotAvailable()) {
  */
 async function waitForBackendReady(webExtension) {
     const {promise, resolve} = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+    let resolved = false;
     /** @type {import('application').ApiMap} */
-    const apiMap = createApiMap([['applicationBackendReady', () => { resolve(); }]]);
+    const apiMap = createApiMap([['applicationBackendReady', () => {
+        resolved = true;
+        resolve();
+    }]]);
     /** @type {import('extension').ChromeRuntimeOnMessageCallback<import('application').ApiMessageAny>} */
     const onMessage = ({action, params}, _sender, callback) => invokeApiMapHandler(apiMap, action, params, [], callback);
     chrome.runtime.onMessage.addListener(onMessage);
+
+    // Timeout fallback for Electron where service worker communication may not work
+    const timeoutId = setTimeout(() => {
+        if (!resolved) {
+            console.log('[Yomitan] Backend ready timeout - proceeding in Electron mode');
+            resolve();
+        }
+    }, 2000);
+
     try {
         await webExtension.sendMessagePromise({action: 'requestBackendReadySignal'});
         await promise;
+        clearTimeout(timeoutId);
     } finally {
         chrome.runtime.onMessage.removeListener(onMessage);
     }

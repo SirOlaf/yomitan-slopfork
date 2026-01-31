@@ -21,7 +21,7 @@ import {HotkeyHandler} from '../input/hotkey-handler.js';
 import {Frontend} from './frontend.js';
 import {PopupFactory} from './popup-factory.js';
 
-await Application.main(false, async (application) => {
+Application.main(false, async (application) => {
     const hotkeyHandler = new HotkeyHandler();
     hotkeyHandler.prepare(application.crossFrame);
 
@@ -42,4 +42,6 @@ await Application.main(false, async (application) => {
         hotkeyHandler,
     });
     await frontend.prepare();
+}).catch((error) => {
+    console.error('[Yomitan] Content script error:', error);
 });

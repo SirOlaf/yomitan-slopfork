@@ -22,11 +22,17 @@ import {Backend} from './backend.js';
 
 /** Entry point. */
 async function main() {
-    const webExtension = new WebExtension();
-    log.configure(webExtension.extensionName);
-
-    const backend = new Backend(webExtension);
-    await backend.prepare();
+    try {
+        const webExtension = new WebExtension();
+        log.configure(webExtension.extensionName);
+        const backend = new Backend(webExtension);
+        await backend.prepare();
+    } catch (error) {
+        console.error('[Yomitan] Fatal error during startup:', error);
+    }
 }
 
-void main();
+// Don't use top-level await - call main() and handle promise
+main().catch((error) => {
+    console.error('[Yomitan] Unhandled error in main:', error);
+});

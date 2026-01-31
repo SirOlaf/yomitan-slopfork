@@ -40,6 +40,10 @@ function ankiFieldMarkerMayUseClipboard(marker) {
  * @returns {Promise<boolean>}
  */
 export function hasPermissions(permissions) {
+    // Electron doesn't support chrome.permissions API - return true as fallback
+    if (typeof chrome === 'undefined' || !chrome.permissions || !chrome.permissions.contains) {
+        return Promise.resolve(true);
+    }
     return new Promise((resolve, reject) => {
         chrome.permissions.contains(permissions, (result) => {
             const e = chrome.runtime.lastError;
@@ -58,6 +62,10 @@ export function hasPermissions(permissions) {
  * @returns {Promise<boolean>}
  */
 export function setPermissionsGranted(permissions, shouldHave) {
+    // Electron doesn't support chrome.permissions API - return success as fallback
+    if (typeof chrome === 'undefined' || !chrome.permissions || !chrome.permissions.request) {
+        return Promise.resolve(true);
+    }
     return (
         shouldHave ?
         new Promise((resolve, reject) => {
@@ -87,6 +95,13 @@ export function setPermissionsGranted(permissions, shouldHave) {
  * @returns {Promise<chrome.permissions.Permissions>}
  */
 export function getAllPermissions() {
+    // Electron doesn't support chrome.permissions API - return all permissions as granted
+    if (typeof chrome === 'undefined' || !chrome.permissions || !chrome.permissions.getAll) {
+        return Promise.resolve({
+            permissions: ['storage', 'clipboardWrite', 'unlimitedStorage', 'clipboardRead', 'nativeMessaging'],
+            origins: ['<all_urls>']
+        });
+    }
     return new Promise((resolve, reject) => {
         chrome.permissions.getAll((result) => {
             const e = chrome.runtime.lastError;
